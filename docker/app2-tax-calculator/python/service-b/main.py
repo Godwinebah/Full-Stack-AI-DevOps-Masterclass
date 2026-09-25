@@ -4,7 +4,7 @@ import socket
 app = Flask(__name__)
 HOSTNAME = socket.gethostname()
 
-TAX_TABLE = {"IN": 18, "US": 8, "EU": 20}
+TAX_TABLE = {"IN": 18, "US": 8, "EU": 20, "NG": 10}
 
 @app.get("/tax")
 def tax():

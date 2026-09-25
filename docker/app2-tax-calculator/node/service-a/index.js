@@ -27,13 +27,15 @@ app.get("/price", async (req, res) => {
   const r = await axios.get(`${TAX_SERVICE_URL}/tax?country=${country}`);
   const tax = Number(r.data.tax);
 
+  console.log({ r})
+
   res.json({
     service: "A",
     amount,
     tax,
     total: amount + tax,
     container: HOSTNAME,
-    service_b_container: r.data.container
+    service_b_container: r.data.Container,
   });
 });
 

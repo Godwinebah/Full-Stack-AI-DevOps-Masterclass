@@ -1,0 +1,105 @@
+
+name: Hello spring Boot App to AKS on Azure
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - "docker/app1-hello/node"
+  workflow_dispatch:
+
+permission:
+    id-token:write
+    contents:read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with: 
+            distribution: 'temurin' # see Support distribution
+            java-version: '21'
+
+      - name: Build and Test (Maven)
+        working-directory: docker/app1-hello/springboot/hello-spring
+        run: mvn -B clean verify
+
+      - name: Upload test Reports
+        uses: actions/upload-artifact@v4
+        with:
+            name: test-reports
+            path: docker/app1-hello/springboot/hello-hello-spring/target
+
+  docker-build-push:
+    runs-on: ubuntu-latest
+    needs: build-test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-python@v5
+        with:
+            distribution: 'temurin' # 'Support distribution'
+            java-version: '21'
+
+        name: Build JAR for Docker
+        working-directory: docker/app1-hello/springboot/hello-spring
+        run: mvn -B clean package -DskipTests
+
+      - name: Login to DockerHub
+        uses: docker/login-action@3   
+        with: 
+          username: ${{secret.DOCKER_USERNAME}}
+          password: ${{secret.PASSWORD}}
+
+        name: Build and push Docker Image
+        uses: docker/build-push-action@6
+        with:
+          context: docker/app1-hello/springboot
+            push: true
+            tags: 
+              ${{ secrets.DOCKER_USERNAME }}/hello-springboot:latest:latest
+              ${{ secrets.DOCKER_USERNAME }}/hello-springboot:latest:${{}}
+              ${{ secrets.DOCKER_USERNAME }}/hello-springboot:latest:${{}}
+     
+    
+  deploy-aks:
+    runs-on: ubuntu-latest
+    needs: docker-build-push
+
+    steps:
+      - name: checkout code
+        uses: 'actions/checkout@v4'
+
+      - name: Authentication to Azure Cloud
+        uses: 'azure/login@v2'
+        with:
+            client-id: ${{secret.AZURE_CLIENT_ID}}
+            tenant-id: ${{secret.AZURE_TENANT_ID}}
+            subscription-id: ${{secret.AZURE_SUBSCRIPTION_ID}}
+
+      - name: setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Set AKS Context
+        uses: azure/k8s-set-context@v4
+        with: 
+            cluster-name: ${{secretS.AZURE_AKS_CLUSTER_NAME}}
+            resource-group: ${{secretS.AZURE_RESOURCE__GROUP}}
+ 
+      - name: Verify connection
+        run: kubectl get nodes
+       
+      - name: Deploy to Azure AKS
+        run: kubectl apply -f kubernates/azure/app1-hello
+      
+ 

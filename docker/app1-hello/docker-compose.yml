@@ -1,0 +1,22 @@
+services:
+  hello-py:
+    image: godwinoko05/hello-py:1.0
+    ports:
+      - "3000:3000"
+    environment:
+      - ENV_VALUE=${ENV_VALUE_PYTHON}
+
+  hello-node:
+    image: godwinoko05/hello-node:1.0
+    ports:
+      - "3001:3000"
+    environment:
+      - ENV_VALUE=${ENV_VALUE_NODE}
+
+  hello-spring:
+    image: godwinoko05/hello-spring:1.0
+    ports:
+      - "8080:3000"
+    environment:
+      - ENV_VALUE=${ENV_VALUE_SPRING}
+

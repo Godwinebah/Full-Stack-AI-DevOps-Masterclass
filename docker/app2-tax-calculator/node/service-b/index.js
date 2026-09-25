@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const HOSTNAME = process.env.HOSTNAME || require('os').hostname();
-const TAX_TABLE = { IN: 18, US: 8, EU: 20 };
+const TAX_TABLE = { IN: 18, US: 8, EU: 20 , NG: 7};
 
 app.get("/tax", (req, res) => {
   const country = (req.query.country || "DEFAULT").toUpperCase();
